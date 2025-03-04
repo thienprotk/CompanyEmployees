@@ -1,7 +1,8 @@
 using CompanyEmployees.Extensions;
-using NLog;
-using Microsoft.AspNetCore.HttpOverrides;
 using Contracts;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
+using NLog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,11 @@ builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(Program));
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 
 builder.Services.AddControllers(config => {
     config.RespectBrowserAcceptHeader = true;
@@ -77,8 +83,6 @@ app.UseAuthorization();
 //    Console.WriteLine($"Writing the response to the client in the Run method");
 //    await context.Response.WriteAsync("Hello from the middleware component.");
 //});
-app.MapControllers();
-
 app.MapControllers();
 
 app.Run();
