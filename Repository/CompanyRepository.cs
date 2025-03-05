@@ -24,4 +24,9 @@ public class CompanyRepository(RepositoryContext repositoryContext) : Repository
     {
         return FindByCondition(x => ids.Contains(x.Id), trackChanges).ToList();
     }
+
+    public void DeleteCompany(Company company)
+    {
+        Delete(company);
+    }
 }
