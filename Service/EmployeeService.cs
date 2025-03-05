@@ -63,4 +63,38 @@ internal sealed class EmployeeService(IRepositoryManager repository, ILoggerMana
         repository.Save();
     }
 
+    public void UpdateEmployeeForCompany(Guid companyId, Guid id, EmployeeForUpdateDto employeeForUpdateDto, bool compTrackChanges, bool empTrackChanges)
+    {
+        var company = repository.Company.GetCompany(companyId, compTrackChanges);
+        if (company is null)
+            throw new CompanyNotFoundException(companyId);
+
+        var employeeEntity = repository.Employee.GetEmployee(companyId, id, empTrackChanges);
+        if (employeeEntity is null)
+            throw new EmployeeNotFoundException(id);
+
+        mapper.Map(employeeForUpdateDto, employeeEntity);
+        repository.Save();
+    }
+
+    public (EmployeeForUpdateDto employeeToPatchDto, Employee employeeEntity) GetEmployeeForPatch(Guid companyId, Guid id, bool compTrackChanges, bool empTrackChanges)
+    {
+        var company = repository.Company.GetCompany(companyId, compTrackChanges);
+        if (company is null)
+            throw new CompanyNotFoundException(companyId);
+
+        var employeeEntity = repository.Employee.GetEmployee(companyId, id, empTrackChanges);
+        if (employeeEntity is null)
+            throw new EmployeeNotFoundException(companyId);
+
+        var employeeToPatch = mapper.Map<EmployeeForUpdateDto>(employeeEntity);
+        return (employeeToPatch, employeeEntity);
+    }
+
+    public void SaveChangesForPatch(EmployeeForUpdateDto employeeToPatchDto, Employee employeeEntity)
+    {
+        mapper.Map(employeeToPatchDto, employeeEntity);
+        repository.Save();
+
+    }
 }
