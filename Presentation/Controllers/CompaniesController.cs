@@ -30,6 +30,9 @@ public class CompaniesController(IServiceManager service) : ControllerBase
         if (companyDto is null)
             return BadRequest("CompanyForCreationDto object is null");
 
+        if (!ModelState.IsValid)
+            return UnprocessableEntity(ModelState);
+
         var createdCompany = service.CompanyService.CreateCompany(companyDto);
         return CreatedAtRoute("CompanyById", new { id = createdCompany.Id }, createdCompany);
     }
@@ -62,8 +65,10 @@ public class CompaniesController(IServiceManager service) : ControllerBase
         if (company is null)
             return BadRequest("CompanyForUpdateDto object is null");
 
+        if (!ModelState.IsValid)
+            return UnprocessableEntity(ModelState);
+
         service.CompanyService.UpdateCompany(id, company, trackChanges: true);
         return NoContent();
     }
-
 }

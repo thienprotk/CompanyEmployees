@@ -29,6 +29,9 @@ public class EmployeesController(IServiceManager service) : ControllerBase
         if (employee is null)
             return BadRequest("EmployeeForCreationDto object is null");
 
+        if (!ModelState.IsValid)
+            return UnprocessableEntity(ModelState);
+
         var employeeToReturn = service.EmployeeService.CreateEmployeeForCompany(companyId, employee, trackChanges: false);
         return CreatedAtRoute("GetEmployeeForCompany", new { companyId, id = employeeToReturn.Id }, employeeToReturn);
     }
@@ -46,6 +49,9 @@ public class EmployeesController(IServiceManager service) : ControllerBase
         if (employee is null)
             return BadRequest("EmployeeForUpdateDto object is null");
 
+        if (!ModelState.IsValid)
+            return UnprocessableEntity(ModelState);
+
         service.EmployeeService.UpdateEmployeeForCompany(companyId, id, employee, compTrackChanges: false, empTrackChanges: true);
         return NoContent();
     }
@@ -57,7 +63,12 @@ public class EmployeesController(IServiceManager service) : ControllerBase
             return BadRequest("patchDoc object sent from client is null.");
 
         var result = service.EmployeeService.GetEmployeeForPatch(companyId, id, compTrackChanges: false, empTrackChanges: true);
-        patchDoc.ApplyTo(result.employeeToPatchDto);
+        patchDoc.ApplyTo(result.employeeToPatchDto, ModelState);
+
+        TryValidateModel(result.employeeToPatchDto);
+
+        if (!ModelState.IsValid)
+            return UnprocessableEntity(ModelState);
 
         service.EmployeeService.SaveChangesForPatch(result.employeeToPatchDto, result.employeeEntity);
         return NoContent();
