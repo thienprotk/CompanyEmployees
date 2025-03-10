@@ -20,9 +20,7 @@ internal sealed class CompanyService(IRepositoryManager repository, ILoggerManag
 
     public async Task<CompanyDto> GetCompanyAsync(Guid companyId, bool trackChanges)
     {
-        var company = await repository.Company.GetCompanyAsync(companyId, trackChanges);
-        if (company is null)
-            throw new CompanyNotFoundException(companyId);
+        var company = await GetCompanyAndCheckIfItExists(companyId, trackChanges);
 
         var companyDto = mapper.Map<CompanyDto>(company);
         return companyDto;
@@ -71,9 +69,7 @@ internal sealed class CompanyService(IRepositoryManager repository, ILoggerManag
 
     public async Task DeleteCompanyAsync(Guid companyId, bool trackChanges)
     {
-        var company = await repository.Company.GetCompanyAsync(companyId, trackChanges);
-        if (company is null)
-            throw new CompanyNotFoundException(companyId);
+        var company = await GetCompanyAndCheckIfItExists(companyId, trackChanges);
 
         repository.Company.DeleteCompany(company);
         await repository.SaveAsync();
@@ -81,11 +77,18 @@ internal sealed class CompanyService(IRepositoryManager repository, ILoggerManag
 
     public async Task UpdateCompanyAsync(Guid companyId, CompanyForUpdateDto companyForUpdateDto, bool trackChanges)
     {
-        var companyEntity = await repository.Company.GetCompanyAsync(companyId, trackChanges);
-        if (companyEntity is null)
-            throw new CompanyNotFoundException(companyId);
+        var companyEntity = await GetCompanyAndCheckIfItExists(companyId, trackChanges);
 
         mapper.Map(companyForUpdateDto, companyEntity);
         await repository.SaveAsync();
+    }
+
+    private async Task<Company> GetCompanyAndCheckIfItExists(Guid id, bool trackChanges)
+    {
+        var company = await repository.Company.GetCompanyAsync(id, trackChanges);
+        if (company is null)
+            throw new CompanyNotFoundException(id);
+
+        return company;
     }
 }
