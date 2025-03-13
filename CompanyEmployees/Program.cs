@@ -1,11 +1,12 @@
 using CompanyEmployees.Extensions;
-using CompanyEmployees.Presentation.ActionFilters;
+using CompanyEmployees.Utility;
 using Contracts;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 using NLog;
+using Presentation.ActionFilters;
 using Service.DataShaping;
 using Shared.DataTransferObjects;
 
@@ -28,6 +29,9 @@ builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(Program));
 
+builder.Services.AddScoped<IDataShaper<EmployeeDto>, DataShaper<EmployeeDto>>();
+builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
+
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.SuppressModelStateInvalidFilter = true;
@@ -42,7 +46,9 @@ builder.Services.AddControllers(config =>
 .AddCustomCSVFormatter()
 .AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
 
-builder.Services.AddScoped<IDataShaper<EmployeeDto>, DataShaper<EmployeeDto>>();
+builder.Services.AddCustomMediaTypes();
+
+builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 builder.Services.AddScoped<ValidationFilterAttribute>();
 
 var app = builder.Build();

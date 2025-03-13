@@ -28,9 +28,9 @@ public class Entity : DynamicObject, IXmlSerializable, IDictionary<string, objec
         return base.TryGetMember(binder, out result);
     }
 
-    public override bool TrySetMember(SetMemberBinder binder, object value)
+    public override bool TrySetMember(SetMemberBinder binder, object? value)
     {
-        _expando[binder.Name] = value;
+        _expando[binder.Name] = value!;
 
         return true;
     }
@@ -52,9 +52,9 @@ public class Entity : DynamicObject, IXmlSerializable, IDictionary<string, objec
 
             reader.MoveToAttribute("type");
             typeContent = reader.ReadContentAsString();
-            underlyingType = Type.GetType(typeContent);
+            underlyingType = Type.GetType(typeContent)!;
             reader.MoveToContent();
-            _expando[name] = reader.ReadElementContentAs(underlyingType, null);
+            _expando[name] = reader.ReadElementContentAs(underlyingType, null!);
         }
     }
 

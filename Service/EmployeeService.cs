@@ -2,29 +2,28 @@
 using Contracts;
 using Entities;
 using Entities.Exceptions;
-using Entities.Models;
+using Entities.LinkModels;
 using Service.Contracts;
-using Service.DataShaping;
 using Shared.DataTransferObjects;
 using Shared.RequestFeatures;
 
 namespace Service;
 
-internal sealed class EmployeeService(IRepositoryManager repository, ILoggerManager logger, IMapper mapper, IDataShaper<EmployeeDto> dataShaper) : IEmployeeService
+internal sealed class EmployeeService(IRepositoryManager repository, ILoggerManager logger, IMapper mapper, IEmployeeLinks employeeLinks) : IEmployeeService
 {
-    public async Task<(IEnumerable<Entity> employees, MetaData metaData)> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
+    public async Task<(LinkResponse linkResponse, MetaData metaData)> GetEmployeesAsync(Guid companyId, LinkParameters linkParameters, bool trackChanges)
     {
-        if (!employeeParameters.ValidAgeRange)
+        if (!linkParameters.EmployeeParameters.ValidAgeRange)
             throw new MaxAgeRangeBadRequestException();
 
         await CheckIfCompanyExists(companyId, trackChanges);
 
-        var employeesWithMetaData = await repository.Employee.GetEmployeesAsync(companyId, employeeParameters, trackChanges);
-        var employeesDTO = mapper.Map<IEnumerable<EmployeeDto>>(employeesWithMetaData);
+        var employeesWithMetaData = await repository.Employee.GetEmployeesAsync(companyId, linkParameters.EmployeeParameters, trackChanges);
 
-        var shapedData = dataShaper.ShapeData(employeesDTO, employeeParameters.Fields);
+        var employeesDto = mapper.Map<IEnumerable<EmployeeDto>>(employeesWithMetaData);
+        var links = employeeLinks.TryGenerateLinks(employeesDto, linkParameters.EmployeeParameters.Fields, companyId, linkParameters.Context);
 
-        return (employees: shapedData, metaData: employeesWithMetaData.MetaData);
+        return (linkResponse: links, metaData: employeesWithMetaData.MetaData);
     }
 
     public async Task<EmployeeDto> GetEmployeeAsync(Guid companyId, Guid id, bool trackChanges)
