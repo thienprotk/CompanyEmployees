@@ -1,11 +1,10 @@
-﻿using Presentation.ActionFilters;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Presentation.ActionFilters;
 using Presentation.ModelBinders;
 using Service.Contracts;
 using Shared.DataTransferObjects;
 
 namespace Presentation.Controllers;
-
 
 [Route("api/companies")]
 [ApiController]
@@ -19,7 +18,7 @@ public class CompaniesController(IServiceManager service) : ControllerBase
         return Ok();
     }
 
-    [HttpGet]
+    [HttpGet(Name = "GetCompanies")]
     public async Task<IActionResult> GetCompanies()
     {
         var companies = await service.CompanyService.GetAllCompaniesAsync(trackChanges: false);
@@ -33,7 +32,7 @@ public class CompaniesController(IServiceManager service) : ControllerBase
         return Ok(company);
     }
 
-    [HttpPost]
+    [HttpPost(Name = "CreateCompany")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
     public async Task<IActionResult> CreateCompany([FromBody] CompanyForCreationDto companyDto)
     {
