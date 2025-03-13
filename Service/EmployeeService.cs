@@ -2,15 +2,17 @@
 using Contracts;
 using Entities;
 using Entities.Exceptions;
+using Entities.Models;
 using Service.Contracts;
+using Service.DataShaping;
 using Shared.DataTransferObjects;
 using Shared.RequestFeatures;
 
 namespace Service;
 
-internal sealed class EmployeeService(IRepositoryManager repository, ILoggerManager logger, IMapper mapper) : IEmployeeService
+internal sealed class EmployeeService(IRepositoryManager repository, ILoggerManager logger, IMapper mapper, IDataShaper<EmployeeDto> dataShaper) : IEmployeeService
 {
-    public async Task<(IEnumerable<EmployeeDto> employees, MetaData metaData)> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
+    public async Task<(IEnumerable<Entity> employees, MetaData metaData)> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
     {
         if (!employeeParameters.ValidAgeRange)
             throw new MaxAgeRangeBadRequestException();
@@ -19,7 +21,10 @@ internal sealed class EmployeeService(IRepositoryManager repository, ILoggerMana
 
         var employeesWithMetaData = await repository.Employee.GetEmployeesAsync(companyId, employeeParameters, trackChanges);
         var employeesDTO = mapper.Map<IEnumerable<EmployeeDto>>(employeesWithMetaData);
-        return (employees: employeesDTO, metaData: employeesWithMetaData.MetaData);
+
+        var shapedData = dataShaper.ShapeData(employeesDTO, employeeParameters.Fields);
+
+        return (employees: shapedData, metaData: employeesWithMetaData.MetaData);
     }
 
     public async Task<EmployeeDto> GetEmployeeAsync(Guid companyId, Guid id, bool trackChanges)
