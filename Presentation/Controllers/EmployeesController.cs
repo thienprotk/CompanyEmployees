@@ -14,6 +14,7 @@ namespace Presentation.Controllers;
 public class EmployeesController(IServiceManager service) : ControllerBase
 {
     [HttpGet]
+    [HttpHead]
     [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
     public async Task<IActionResult> GetEmployeesForCompany(Guid companyId, [FromQuery] EmployeeParameters employeeParameters)
     {

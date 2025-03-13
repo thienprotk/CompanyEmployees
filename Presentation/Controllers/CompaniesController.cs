@@ -11,6 +11,14 @@ namespace Presentation.Controllers;
 [ApiController]
 public class CompaniesController(IServiceManager service) : ControllerBase
 {
+    [HttpOptions]
+    public IActionResult GetCompaniesOptions()
+    {
+        Response.Headers.Add("Allow", "GET, OPTIONS, POST, PUT, DELETE");
+
+        return Ok();
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetCompanies()
     {
