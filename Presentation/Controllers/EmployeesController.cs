@@ -1,4 +1,5 @@
 ﻿using Entities.LinkModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.ActionFilters;
@@ -10,6 +11,7 @@ using System.Text.Json;
 namespace Presentation.Controllers;
 
 [Route("api/companies/{companyId}/employees")]
+[Authorize]
 [ApiController]
 public class EmployeesController(IServiceManager service) : ControllerBase
 {

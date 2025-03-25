@@ -9,6 +9,7 @@ using Shared.DataTransferObjects;
 namespace Presentation.Controllers;
 
 [Route("api/companies")]
+[Authorize]
 [ApiController]
 //[ResponseCache(CacheProfileName = "120SecondsDuration")]
 public class CompaniesController(IServiceManager service) : ControllerBase
