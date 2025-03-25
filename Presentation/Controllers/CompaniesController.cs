@@ -11,6 +11,7 @@ namespace Presentation.Controllers;
 [Route("api/companies")]
 [Authorize]
 [ApiController]
+[ApiExplorerSettings(GroupName = "v1")]
 //[ResponseCache(CacheProfileName = "120SecondsDuration")]
 public class CompaniesController(IServiceManager service) : ControllerBase
 {
@@ -22,8 +23,12 @@ public class CompaniesController(IServiceManager service) : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Gets the list of all companies
+    /// </summary>
+    /// <returns>The companies list</returns>
     [HttpGet(Name = "GetCompanies")]
-    [Authorize(Roles = "Manager")]
+    //[Authorize(Roles = "Manager")]
     public async Task<IActionResult> GetCompanies()
     {
         var companies = await service.CompanyService.GetAllCompaniesAsync(trackChanges: false);

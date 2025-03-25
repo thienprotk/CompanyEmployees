@@ -5,6 +5,7 @@ using Contracts;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NLog;
 using Presentation.ActionFilters;
@@ -49,6 +50,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddAuthentication();
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.ConfigureSwagger();
 
 builder.Services.AddControllers(config =>
 {
@@ -124,6 +126,13 @@ app.UseAuthorization();
 //    Console.WriteLine($"Writing the response to the client in the Run method");
 //    await context.Response.WriteAsync("Hello from the middleware component.");
 //});
+app.UseSwagger();
+app.UseSwaggerUI(s =>
+{
+    s.SwaggerEndpoint("/swagger/v1/swagger.json", "Ed API v1");
+    s.SwaggerEndpoint("/swagger/v2/swagger.json", "Ed API v2");
+});
+
 app.MapControllers();
 
 app.Run();
